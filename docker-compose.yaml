@@ -1,0 +1,65 @@
+version: '3'
+services:
+    db:
+        image: mysql:8.0
+        environment:
+            - "MYSQL_DATABASE=${DB_DATABASE}"
+            - "MYSQL_USER=${DB_USERNAME}"
+            - "MYSQL_PASSWORD=${DB_PASSWORD}"
+            - "MYSQL_RANDOM_ROOT_PASSWORD=1"
+            - TZ=Europe/Paris
+        volumes:
+            - dbdata:/var/lib/mysql
+        ports:
+            - 3306:3306
+            - 33060:33060
+    laravel:
+        build:
+            context: .
+            dockerfile: docker/laravel.dockerfile
+        depends_on:
+            - db
+        environment:
+            - TZ=Europe/Paris
+        working_dir: /var/www/
+        volumes:
+            - .:/var/www/
+        command:
+            - docker/laravel_init.sh
+    redis:
+        image: redis
+        environment:
+            - TZ=Europe/Paris
+        expose:
+            - 6379
+    vite:
+        image: node:18
+        depends_on:
+            - db
+            - laravel
+        working_dir: /home/node/app
+        command: bash -c "npm install && npm run dev"
+        volumes:
+            - .:/home/node/app
+        ports:
+            - 5173:5173
+    nginx:
+        build:
+            context: .
+            dockerfile: docker/nginx.dockerfile
+        depends_on:
+            - db
+            - laravel
+        environment:
+            - TZ=Europe/Paris
+        volumes:
+            - .:/var/www/
+        ports:
+            - 80:80
+            - 443:443
+
+networks:
+    default:
+        driver: bridge
+volumes:
+    dbdata:
