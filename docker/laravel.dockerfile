@@ -3,7 +3,7 @@ FROM php:8.2-fpm
 
 # Set working directory
 WORKDIR /var/www
-# USER $user
+USER $user
 
 # Copy config
 COPY docker/resources/laravel/php/php.ini $PHP_INI_DIR/php.ini
