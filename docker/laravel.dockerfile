@@ -56,10 +56,11 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Dont know why old version is cached but let's fix it this way for now
 RUN /usr/bin/composer self-update
 
+# Set user to laravel
+USER laravel
+
 # Artisan alias
 RUN echo 'alias a="php artisan"' >> ~/.bashrc
 
-# Set user to laravel
-USER laravel
 
 EXPOSE 9000
